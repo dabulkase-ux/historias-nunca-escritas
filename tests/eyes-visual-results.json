@@ -1,0 +1,62 @@
+[
+  {
+    "width": 320,
+    "frame": 0,
+    "meanChannelDifference": 0.813689755721831,
+    "changedPercent": 1.6862896126760563
+  },
+  {
+    "width": 320,
+    "frame": 1,
+    "meanChannelDifference": 0.138671875,
+    "changedPercent": 0.22557218309859156
+  },
+  {
+    "width": 320,
+    "frame": 2,
+    "meanChannelDifference": 0.03199136223591549,
+    "changedPercent": 0.05061619718309859
+  },
+  {
+    "width": 320,
+    "frame": 3,
+    "meanChannelDifference": 0.1583282900528169,
+    "changedPercent": 0.2695862676056338
+  },
+  {
+    "width": 320,
+    "frame": 4,
+    "meanChannelDifference": 0.12372221610915493,
+    "changedPercent": 0.20796654929577463
+  },
+  {
+    "width": 1440,
+    "frame": 0,
+    "meanChannelDifference": 0.2459170138888889,
+    "changedPercent": 0.39138888888888884
+  },
+  {
+    "width": 1440,
+    "frame": 1,
+    "meanChannelDifference": 0.05777309027777778,
+    "changedPercent": 0.11916666666666666
+  },
+  {
+    "width": 1440,
+    "frame": 2,
+    "meanChannelDifference": 0.012131770833333333,
+    "changedPercent": 0.01916666666666667
+  },
+  {
+    "width": 1440,
+    "frame": 3,
+    "meanChannelDifference": 0.06140225694444444,
+    "changedPercent": 0.12805555555555556
+  },
+  {
+    "width": 1440,
+    "frame": 4,
+    "meanChannelDifference": 0.052267708333333336,
+    "changedPercent": 0.10784722222222222
+  }
+]

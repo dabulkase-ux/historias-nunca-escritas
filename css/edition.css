@@ -1,0 +1,19 @@
+/* V2 additions are scoped to the new scenes. The approved V1 sheet is untouched. */
+.eyes-scene{position:fixed;inset:0;z-index:12;pointer-events:none;isolation:isolate}
+.eyes-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.eyes-back{position:absolute;bottom:max(28px,env(safe-area-inset-bottom));left:max(28px,calc((100vw - 800px)/2));pointer-events:auto;color:#6e5b52;z-index:1}
+.page.poem{max-width:470px;padding:35px 35px 45px;border-left:1px solid #c8b29c55;background:linear-gradient(110deg,#dfd0b216,transparent 65%)}
+.poem .eyebrow{letter-spacing:4px;font-size:10px}
+.poem h1{font-size:clamp(38px,5vw,55px);font-style:italic;margin-bottom:55px}
+.poem .narrative{font-size:20px;line-height:1.8}
+.poem .type-block{margin-bottom:27px}
+.poem .poem-pivot{font-size:36px;font-style:italic;color:var(--accent);margin:54px 0}
+.poem-isolation{position:fixed;inset:0;z-index:11;background:#f2ede3;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:28px;animation:poem-settle 1s both}
+.poem-question{font:italic clamp(56px,11vw,94px)/1.2 Georgia,serif;letter-spacing:-2px;color:#8e4550;margin:0}
+.poem-isolation .page-actions{position:absolute;bottom:max(40px,env(safe-area-inset-bottom));width:min(600px,calc(100% - 56px));margin:0}
+.poem-reread{margin-top:35px;color:#81746d;font-size:11px}
+.clean-page .narrative p:last-child{margin-top:28px;font-style:italic}
+@keyframes poem-settle{from{opacity:0}to{opacity:1}}
+@media(max-width:700px){.page.poem{padding:15px 14px 20px 25px}.poem .narrative{font-size:18px}.poem .page-actions{gap:10px}.poem .text-button{letter-spacing:.3px}.eyes-back{left:28px}}
+@media(max-height:420px){.eyes-back{bottom:12px}.poem-isolation .page-actions{bottom:15px}.poem-question{font-size:55px}}
+@media(prefers-reduced-motion:reduce){.poem-isolation{animation:none}}

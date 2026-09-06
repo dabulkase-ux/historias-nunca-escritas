@@ -1,0 +1,12 @@
+const fs=require('node:fs'),vm=require('node:vm'),crypto=require('node:crypto'),assert=require('node:assert/strict');
+const baseline=JSON.parse(fs.readFileSync('tests/fixtures/epilogue-v1.json','utf8'));
+const app=fs.readFileSync('js/app.js','utf8');
+const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+assert.equal(app.slice(app.indexOf('  async function epilogue(signal)'),app.indexOf("  root.addEventListener('click'")),baseline.epilogueFunction,'Approved epilogue function changed');
+assert.equal(hash('js/audio.js'),baseline.audioHash,'Approved audio changed');
+assert.equal(hash('css/style.css'),baseline.stylesheetHash,'Approved V1 stylesheet changed');
+assert.equal(fs.readFileSync('js/typewriter.js','utf8').split('window.Typewriter')[0],baseline.sleepFunction,'Epilogue timer primitive changed');
+const c={window:{}};vm.runInNewContext(fs.readFileSync('js/content.js','utf8'),c);const book=JSON.parse(JSON.stringify(c.window.BOOK));
+assert.deepEqual(book.epilogue,baseline.epilogue);
+Object.entries(baseline.timings).forEach(([key,value])=>assert.equal(book.timings[key],value,`Frozen timing: ${key}`));
+console.log('PASS: frozen epilogue function, original stylesheet, audio, timing primitive, all epilogue timings and texts are unchanged.');

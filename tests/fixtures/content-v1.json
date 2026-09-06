@@ -1,0 +1,163 @@
+{
+  "timings": {
+    "fast": 9,
+    "dramatic": 175,
+    "backspace": 160,
+    "paragraph": 115,
+    "transition": 380,
+    "eyes": 4300,
+    "chain": 1100,
+    "black": 1500,
+    "endingHold": 3000,
+    "rethink": 650,
+    "reveal": 1300
+  },
+  "ui": {
+    "next": "próximo capítulo",
+    "back": "voltar",
+    "skip": "toque para revelar o texto",
+    "start": "Começar",
+    "epilogue": "Epílogo",
+    "continue": "continuar",
+    "restart": "Voltar ao início",
+    "question": "Ele vai admitir?",
+    "yes": "Sim",
+    "no": "Obviamente não",
+    "soundOn": "som ligado",
+    "soundOff": "som desligado"
+  },
+  "decoration": {
+    "kicker": "UM LIVRO SOBRE ENCONTROS IMPROVÁVEIS",
+    "margin": "ALGUMAS COISAS MERECEM SER ESCRITAS"
+  },
+  "cover": {
+    "title": "Maduh",
+    "subtitle": "uma história que começou de um jeito bem improvável.",
+    "note": "algumas histórias não estão em estantes.\nelas estão nas pessoas certas."
+  },
+  "epilogue": {
+    "first": "Fim.",
+    "second": "Ainda não sei.",
+    "note": "Talvez algumas histórias não precisem de um fim agora."
+  },
+  "branch": {
+    "yes": [
+      "Eventualmente, admitiu.",
+      "E, de repente, tudo ficou um pouco mais complicado."
+    ],
+    "no": [
+      "Maduh aparentemente tinha outros planos."
+    ]
+  },
+  "pages": [
+    {
+      "label": "ANTES DE TUDO",
+      "title": "Para você.",
+      "theme": "dedication",
+      "paragraphs": [
+        "Para a garota que transforma até os dias mais comuns em capítulos que valem a pena."
+      ],
+      "note": "Obrigada por existir nesse enredo."
+    },
+    {
+      "label": "CAPÍTULO 01",
+      "title": "Cicatrizes",
+      "paragraphs": [
+        "Engraçado pensar que tudo começou porque você perguntou sobre as minhas cicatrizes.",
+        "Um completo estranho, com uma história nada comum.",
+        "Definitivamente não parecia o início de uma história romântica."
+      ],
+      "note": "Só uma pergunta.\nQue mudou muita coisa."
+    },
+    {
+      "label": "CAPÍTULO 02",
+      "title": "Sem perceber",
+      "paragraphs": [
+        "A gente começou a conversar.",
+        "E, de forma meio aleatória — e muito rápida — fomos nos aproximando.",
+        "No começo, eu não queria nada.",
+        "Eu respeitava você, seu caminho, sua fé e tudo aquilo em que você acredita.",
+        "Mas a vida tem um jeito engraçado de bagunçar planos.",
+        "E, sem perceber, você foi ficando."
+      ]
+    },
+    {
+      "label": "CAPÍTULO 03",
+      "title": "Os olhos",
+      "effect": "eyes",
+      "paragraphs": [
+        "Em algum momento eu cometi o erro de começar a reparar nos seus olhos.",
+        "E aí já era."
+      ],
+      "note": "Tem coisas que a gente olha uma vez e nunca mais consegue esquecer."
+    },
+    {
+      "label": "CAPÍTULO 04",
+      "title": "Você já sabia",
+      "effect": "choice",
+      "paragraphs": [
+        "Você percebeu antes.",
+        "E, ao invés de deixar quieto, resolveu me provocar.",
+        "Até eu me confessar.",
+        "Clássico você."
+      ]
+    },
+    {
+      "label": "CAPÍTULO 05",
+      "title": "A gente",
+      "theme": "warm",
+      "paragraphs": [
+        "E então aconteceu.",
+        "Por algum tempo, existiu um ‘a gente’.",
+        "Foi real.\nFoi intenso.\nFoi leve.\nE significou mais pra mim do que provavelmente consegui demonstrar."
+      ],
+      "note": "Alguns capítulos são curtos.\nIsso não faz deles menos importantes."
+    },
+    {
+      "label": "CAPÍTULO 06",
+      "title": "Nem todo capítulo termina como a gente queria.",
+      "theme": "sober",
+      "paragraphs": [
+        "O nosso também não terminou do jeito que eu queria.",
+        "E sim, isso doeu.",
+        "Mas eu nunca conseguiria olhar para o que a gente viveu como um erro.",
+        "Porque foi verdadeiro enquanto existiu.",
+        "E histórias verdadeiras deixam alguma coisa boa, mesmo quando mudam de direção."
+      ]
+    },
+    {
+      "label": "CAPÍTULO 07",
+      "title": "Ainda",
+      "paragraphs": [
+        "Eu tentei entender onde colocar tudo isso.",
+        "Talvez em uma lembrança.",
+        "Talvez em algum lugar entre aquilo que aconteceu e aquilo que ainda poderia acontecer.",
+        "A verdade é mais simples:",
+        "eu ainda gosto de você.",
+        "E eu ainda tenho esperança.",
+        "Não porque eu saiba como essa história termina.",
+        "Mas justamente porque eu não sei."
+      ],
+      "emphasis": 4
+    },
+    {
+      "label": "UMA ÚLTIMA PÁGINA",
+      "title": "Entre as linhas.",
+      "paragraphs": [
+        "Você disse que amaria se eu programasse alguma coisa pra você.",
+        "Então eu programei uma história.",
+        "Por coincidência, você é minha personagem favorita nela.",
+        "Não sei como esse livro termina.",
+        "Mas ainda gosto muito dos capítulos em que você está."
+      ],
+      "note": "Obrigado por ler até aqui.\n— Arthur"
+    },
+    {
+      "label": "O QUE FICA",
+      "title": "Obrigado por fazer parte da minha história.",
+      "theme": "dedication",
+      "paragraphs": [],
+      "note": "Talvez um dia a gente se encontre de novo em um capítulo que ainda não foi escrito."
+    }
+  ]
+}

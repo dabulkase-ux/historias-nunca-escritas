@@ -1,0 +1,20 @@
+{
+  "epilogueFunction": "  async function epilogue(signal) {\n    const scene = el('section','epilogue'); scene.setAttribute('aria-label','Epílogo');\n    const line = el('h1','epilogue-line'), text = el('span'), cursor = el('span','epilogue-cursor'); cursor.setAttribute('aria-hidden','true');\n    line.append(text); scene.append(line); root.append(scene); root.focus({preventScroll:true});\n    await sleep(BOOK.timings.black,signal); if (signal.aborted) return; line.append(cursor);\n    async function write(value) { for (const char of value) { if (signal.aborted) return; text.textContent += char; audio.click(); await sleep(BOOK.timings.dramatic,signal); } }\n    await write(BOOK.epilogue.first); await sleep(BOOK.timings.endingHold,signal);\n    while(text.textContent.length && !signal.aborted) { text.textContent = text.textContent.slice(0,-1); audio.click(true); await sleep(BOOK.timings.backspace,signal); }\n    await sleep(BOOK.timings.rethink,signal); await write(BOOK.epilogue.second); await sleep(BOOK.timings.endingHold,signal);\n    if (signal.aborted) return;\n    const below = el('div','epilogue-below'); below.append(el('p','epilogue-note',BOOK.epilogue.note)); scene.append(below);\n    await sleep(BOOK.timings.reveal,signal); if(signal.aborted) return;\n    below.append(button(BOOK.ui.continue,'text-button',()=>navigate(9))); nextReady = true;\n  }\n",
+  "audioHash": "ab39d7b65d52a35bf962c1b6a807807030280e779add9a1737206bc374d087e9",
+  "stylesheetHash": "c8254c849de536a5f40cbd0b5193488decf840d959f285b731be446cfe612d54",
+  "timings": {
+    "dramatic": 175,
+    "backspace": 160,
+    "transition": 380,
+    "black": 1500,
+    "endingHold": 3000,
+    "rethink": 650,
+    "reveal": 1300
+  },
+  "epilogue": {
+    "first": "Fim.",
+    "second": "Ainda não sei.",
+    "note": "Talvez algumas histórias não precisem de um fim agora."
+  },
+  "sleepFunction": "window.sleep = (ms, signal) => new Promise(resolve => {\n  if (signal?.aborted) return resolve();\n  const done = () => { clearTimeout(timer); signal?.removeEventListener('abort', done); resolve(); };\n  const timer = setTimeout(done, ms); signal?.addEventListener('abort', done, { once: true });\n});\n"
+}
