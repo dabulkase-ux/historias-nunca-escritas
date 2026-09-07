@@ -153,7 +153,7 @@
   }
   root.addEventListener('click',event=>{ if (!event.target.closest('button,a') && index !== EPILOGUE && writer.active) writer.skip(); });
   document.querySelector('#home').addEventListener('click',event=>{ event.preventDefault(); if(index === EPILOGUE)return; navigate(-1); });
-  document.querySelector('#sound').addEventListener('click',async()=>{ const enabled = await audio.toggle(); const control = document.querySelector('#sound'); await SecretLayer.setAudioEnabled(enabled); control.setAttribute('aria-pressed',enabled); control.setAttribute('aria-label',enabled ? 'Desligar som' : 'Ligar som'); document.querySelector('#sound-label').textContent = enabled ? BOOK.ui.soundOn : BOOK.ui.soundOff; });
+  document.querySelector('#sound').addEventListener('click',async()=>{ const enabled = await audio.toggle(); const control = document.querySelector('#sound'); await SecretLayer.setAudioEnabled(enabled); const label = enabled ? 'Som ligado' : 'Som desligado'; control.setAttribute('aria-pressed',String(enabled)); control.setAttribute('aria-label',label); control.title=label; document.querySelector('#sound-label').textContent = label; });
   document.addEventListener('keydown',event=>{
     if (event.altKey || event.ctrlKey || event.metaKey || event.target.closest('button,a')) return;
     if (index === EPILOGUE && !nextReady) return;
