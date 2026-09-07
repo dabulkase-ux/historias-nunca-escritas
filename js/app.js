@@ -6,7 +6,7 @@
   // Stable V1 addresses keep the frozen epilogue's closing destination intact.
   const EPILOGUE = 11, INTERLUDE = 10, LAST_PAGE = 8, CLOSING = 9;
   const order = [-1,0,1,2,3,4,5,6,INTERLUDE,7,LAST_PAGE,EPILOGUE,CLOSING];
-  let eyesSequenceSeen = false;
+  let eyesSequenceSeen = BookMemory.state.eyesSequenceSeen;
   const visited = new Set();
   const forward = () => index === CLOSING ? -1 : order[order.indexOf(index)+1];
   const backward = () => index === CLOSING ? LAST_PAGE : order[order.indexOf(index)-1];
@@ -31,14 +31,15 @@
   async function navigate(target) {
     if (busy) return;
     busy = true; nextReady = false;
-    if (target === -1) { branchChoice = null; eyesSequenceSeen = false; visited.clear(); }
+    SecretLayer.beforeNavigate(index,target);
+    if (target === -1 && root.childElementCount) { branchChoice = null; eyesSequenceSeen = false; visited.clear(); BookMemory.restart(); }
     controller.abort(); controller = new AbortController(); const signal = controller.signal;
     if (root.childElementCount && !motion.matches) await root.animate([{ opacity: 1, transform: 'translateY(0)' }, { opacity: 0, transform: 'translateY(-8px)' }], { duration: BOOK.timings.transition, fill:'forwards' }).finished;
     root.getAnimations().forEach(a => a.cancel()); root.replaceChildren(); index = target;
     window.scrollTo({ top:0, behavior:'instant' });
     if (index === -1) renderCover();
     else if (index === EPILOGUE) { updateChrome('epilogue'); busy = false; await epilogue(signal); return; }
-    else renderPage(BOOK.pages[index], signal);
+    else { BookMemory.page(index); renderPage(BOOK.pages[index], signal); }
     if (!motion.matches) root.animate([{ opacity:0, transform:'translateY(9px)' }, { opacity:1, transform:'translateY(0)' }], { duration:BOOK.timings.transition });
     root.focus({ preventScroll:true }); busy = false;
   }
@@ -48,6 +49,7 @@
     cover.append(el('p','cover-kicker',BOOK.decoration.kicker), el('h1','',BOOK.cover.title), el('p','subtitle',BOOK.cover.subtitle), button(BOOK.ui.start,'start',()=>navigate(0)), el('p','cover-note',BOOK.cover.note));
     const star = el('span','cover-mark','✳'); star.setAttribute('aria-hidden','true');
     const orbit = el('span','orbit'); orbit.setAttribute('aria-hidden','true'); cover.append(star,orbit); root.append(cover);
+    SecretLayer.cover(cover,controller.signal,navigate);
   }
   async function renderPage(data, signal) {
     updateChrome(data.theme);
@@ -69,7 +71,7 @@
     const back = button(`← ${BOOK.ui.back}`,'text-button back',()=>navigate(backward())); actions.append(back);
     const skip = button(BOOK.ui.skip,'skip',()=>writer.skip()); actions.append(skip);
     const next = nextButton(index === LAST_PAGE ? BOOK.ui.epilogue : index === CLOSING ? BOOK.ui.restart : BOOK.ui.next,()=>navigate(forward())); next.hidden = true; actions.append(next); article.append(actions); root.append(article);
-    const finish = () => { if (signal.aborted) return; visited.add(index); article.dataset.phase='ready'; nextReady = true; skip.hidden = true; next.hidden = false; next.classList.add('ready'); };
+    const finish = () => { if (signal.aborted) return; visited.add(index); article.dataset.phase='ready'; nextReady = true; skip.hidden = true; next.hidden = false; next.classList.add('ready'); if(index===CLOSING)BookMemory.complete();else SecretLayer.mount(article,index,signal); };
     if (revisitEyes) paragraphs.forEach(p=>{p.querySelector('.typed').textContent=p.dataset.text;});
     else await writer.write(paragraphs, { signal, reduced:motion.matches, ...(data.effect === 'poem' ? {speed:BOOK.timings.poemSpeed,paragraphPause:BOOK.timings.poemParagraph} : {}) });
     if (signal.aborted) return;
@@ -78,11 +80,12 @@
       article.dataset.phase='eyes';
       if(!revisitEyes) await sleep(motion.matches ? 0 : 350,signal);
       if (signal.aborted) return;
-      const complete = await BookAnimations.eyes(narrative,{signal,reduced:motion.matches,revisit:revisitEyes,onBack:()=>navigate(backward())});
-      if (complete && !signal.aborted) eyesSequenceSeen = true;
+      const complete = await BookAnimations.eyes(narrative,{signal,reduced:motion.matches,revisit:revisitEyes,onBack:()=>navigate(backward()),pupilAvailable:revisitEyes&&!BookMemory.has('pupilSecret'),pupilText:SECRETS.text.pupil,onPupilSecret:()=>{if(BookMemory.has('pupilSecret'))return false;BookMemory.discover('pupilSecret');return true;}});
+      if (complete && !signal.aborted) { eyesSequenceSeen = true; BookMemory.eyes(); if(revisitEyes)BookMemory.discover('eyeRoll'); }
     }
     if (signal.aborted) return;
     if (data.effect === 'choice') {
+      SecretLayer.mount(article,index,signal);
       const choice = el('section','choice ready'); choice.setAttribute('aria-label',BOOK.ui.question);
       choice.append(el('p','choice-label',BOOK.ui.question));
       const buttons = el('div','choice-buttons');
@@ -128,6 +131,7 @@
         window.scrollTo({top:0,behavior:'instant'});root.focus({preventScroll:true});
       });
       isolation.append(reread);finish();root.focus({preventScroll:true});
+      SecretLayer.fugitive(question,signal);
       return;
     }
     if (note) { skip.hidden = false; await writer.write([note],{signal,reduced:motion.matches}); }
@@ -149,7 +153,7 @@
   }
   root.addEventListener('click',event=>{ if (!event.target.closest('button,a') && index !== EPILOGUE && writer.active) writer.skip(); });
   document.querySelector('#home').addEventListener('click',event=>{ event.preventDefault(); if(index === EPILOGUE)return; navigate(-1); });
-  document.querySelector('#sound').addEventListener('click',async()=>{ const enabled = await audio.toggle(); const control = document.querySelector('#sound'); control.setAttribute('aria-pressed',enabled); control.setAttribute('aria-label',enabled ? 'Desligar som de digitação' : 'Ligar som de digitação'); document.querySelector('#sound-label').textContent = enabled ? BOOK.ui.soundOn : BOOK.ui.soundOff; });
+  document.querySelector('#sound').addEventListener('click',async()=>{ const enabled = await audio.toggle(); const control = document.querySelector('#sound'); await SecretLayer.setAudioEnabled(enabled); control.setAttribute('aria-pressed',enabled); control.setAttribute('aria-label',enabled ? 'Desligar som' : 'Ligar som'); document.querySelector('#sound-label').textContent = enabled ? BOOK.ui.soundOn : BOOK.ui.soundOff; });
   document.addEventListener('keydown',event=>{
     if (event.altKey || event.ctrlKey || event.metaKey || event.target.closest('button,a')) return;
     if (index === EPILOGUE && !nextReady) return;
@@ -162,5 +166,6 @@
     }
   });
   // Algumas variáveis não precisam de um valor definitivo. Ainda.
+  SecretLayer.music();
   navigate(-1);
 })();

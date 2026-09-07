@@ -110,7 +110,7 @@ window.EyesScene = (() => {
     }
     return sources;
   }
-  async function play(container, { signal, reduced=false, revisit=false, onBack }={}) {
+  async function play(container, { signal, reduced=false, revisit=false, onBack, pupilAvailable=false, pupilText='', onPupilSecret }={}) {
     if(signal.aborted)return false;
     const scene=document.createElement('div');scene.className='eyes-scene';scene.dataset.revisit=String(revisit);
     const canvas=document.createElement('canvas');canvas.className='eyes-canvas';canvas.setAttribute('aria-hidden','true');
@@ -124,6 +124,23 @@ window.EyesScene = (() => {
     let previousDilation=-1,previousGazeX=-1,previousGazeY=-1,previousPhase='';
     const originalVisibility=outputs.map(node=>node.style.visibility);
     const savedFocus=document.activeElement;
+    const pupilButtons=[],secretAnimations=[];
+    let pausedAt=0,pauseTotal=0,touchedSide=0,secretUsed=false,message=null;
+    if(revisit&&pupilAvailable){
+      for(const side of [-1,1]){
+        const hit=document.createElement('button');hit.type='button';hit.className='pupil-hit';hit.hidden=true;hit.setAttribute('aria-label',SECRETS.labels.pupil+(side===-1?' esquerda':' direita'));scene.append(hit);pupilButtons.push({hit,side});
+        hit.onclick=()=>{
+          if(secretUsed||hit.hidden||signal.aborted)return;
+          if(onPupilSecret?.()===false)return;
+          secretUsed=true;touchedSide=side;pausedAt=performance.now();scene.dataset.pupilSecret='active';pupilButtons.forEach(({hit})=>{hit.hidden=true;});
+          message=document.createElement('p');message.className='pupil-message';message.style.top=`${cy+half*.8}px`;scene.append(message);
+          Array.from(pupilText).forEach((char,i)=>{
+            const glyph=document.createElement('span');glyph.textContent=char;message.append(glyph);
+            const a=glyph.animate([{opacity:0,transform:reduced?'none':`translate(${i%2?-50:50}px,-35px)`},{opacity:0,offset:.25},{opacity:1,transform:'translate(0,0)',offset:.48},{opacity:1,offset:.8},{opacity:0,transform:reduced?'none':`translate(${i%2?35:-35}px,-25px)`}],{duration:SECRETS.timing.pupilHold,fill:'both',easing:'ease-in-out'});secretAnimations.push(a);
+          });
+        };
+      }
+    }
     diagnostics.active++;diagnostics.particles=particles.length;
     function geometry() {
       const resized=width!==innerWidth||height!==innerHeight;
@@ -166,7 +183,7 @@ window.EyesScene = (() => {
         signal.removeEventListener('abort',abort);
         window.removeEventListener('resize',change);window.removeEventListener('orientationchange',change);window.removeEventListener('scroll',change);
         outputs.forEach((node,i)=>{node.style.visibility=originalVisibility[i];});
-        scene.remove();originAtlas?.close?.();diagnostics.active--;diagnostics.listeners-=3;diagnostics.particles=0;diagnostics.frames=0;
+        secretAnimations.forEach(a=>a.cancel());scene.remove();originAtlas?.close?.();diagnostics.active--;diagnostics.listeners-=3;diagnostics.particles=0;diagnostics.frames=0;
         if(complete && savedFocus?.isConnected && document.activeElement===document.body)savedFocus.focus({preventScroll:true});
         resolve(complete);
       }
@@ -174,7 +191,9 @@ window.EyesScene = (() => {
       function draw(now) {
         if(signal.aborted){finish(false);return;}
         if(dirty)geometry();
-        const t=clamp((now-started)/duration);
+        let secretProgress=pausedAt?(now-pausedAt)/SECRETS.timing.pupilHold:0;
+        if(pausedAt&&secretProgress>=1){pauseTotal+=now-pausedAt;pausedAt=0;message?.remove();scene.dataset.pupilSecret='done';previousGazeX=-9;}
+        const t=clamp(((pausedAt||now)-started-pauseTotal)/duration);
         let formation=1,disperse=0,blink=0,dilation=0,gazeX=0,gazeY=0,phase='formed';
         if(reduced){disperse=ease((t-.7)/.3);phase='reduced';}
         else if(revisit){
@@ -198,16 +217,22 @@ window.EyesScene = (() => {
           dilation=ease((t-.51)/.18);
         }
         if(phase!==previousPhase){scene.dataset.phase=phase;previousPhase=phase;}
+        if(pupilButtons.length&&!secretUsed){
+          const available=reduced?(t>.1&&t<.7):(t>.6&&t<.78);
+          for(const {hit,side} of pupilButtons){if(hit.hidden===available)hit.hidden=!available;if(available){hit.style.left=`${cx+side*half*1.25+gazeX*half-22}px`;hit.style.top=`${cy+gazeY*half-22}px`;}}
+        }
         diagnostics.dilation=dilation;
-        if(dilation!==previousDilation||gazeX!==previousGazeX||gazeY!==previousGazeY){
+        const secretGaze=pausedAt?(secretProgress<.28?ease(secretProgress/.2):1-ease((secretProgress-.28)/.17)):0;
+        if(pausedAt||dilation!==previousDilation||gazeX!==previousGazeX||gazeY!==previousGazeY){
           // Normalized eye anatomy is recomputed only while the expression changes.
           for(let i=0;i<particles.length;i++){
             const p=particles[i];if(!p.inner)continue;
             const r=p.kind==='pupil'?p.radius*mix(.14,.225,dilation):p.radius+dilation*(.455-p.radius)*.18;
-            const x=p.cos*r+gazeX,y=p.sin*r+gazeY;
+            const eyeX=pausedAt?(p.side===touchedSide?0:touchedSide*.25*secretGaze):gazeX,eyeY=pausedAt?0:gazeY;
+            const x=p.cos*r+eyeX,y=p.sin*r+eyeY;
             const arch=Math.pow(Math.max(0,Math.sin(Math.PI*(x+1)/2)),.78),tilt=p.side*x*.055;
             p.ex=x;p.ey=y;p.alpha=y<-.49*arch+tilt||y>.35*arch+tilt?0:1;
-            if((x-gazeX+.095)**2+(y-gazeY+.12)**2<.0035||(x-gazeX-.075)**2+(y-gazeY-.11)**2<.00055)p.alpha=0;
+            if((x-eyeX+.095)**2+(y-eyeY+.12)**2<.0035||(x-eyeX-.075)**2+(y-eyeY-.11)**2<.00055)p.alpha=0;
           }
           previousDilation=dilation;previousGazeX=gazeX;previousGazeY=gazeY;
         }

@@ -3,7 +3,7 @@ const fs=require('node:fs');
 const {chromium,devices}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 fs.mkdirSync('tests/screenshots',{recursive:true});
 async function open(browser,options={}){
- const page=await browser.newPage(options);const errors=[];
+ const context=await browser.newContext(options);const page=await context.newPage();const errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
  await page.goto('http://127.0.0.1:4173');await page.waitForTimeout(450);return{page,errors};
 }

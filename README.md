@@ -22,7 +22,11 @@ Acesse http://127.0.0.1:4173. Encerre o servidor com Ctrl+C.
 - `js/typewriter.js`: escrita reutilizável em lotes, cancelamento e revelação imediata.
 - `js/animations.js`: integração dos olhos e correntes/cadeado existentes.
 - `js/eyes.js`: partículas tipográficas em Canvas 2D, primeira visita e revisita.
+- `js/memory.js`: única chave persistente, validação, reset e migração segura.
+- `js/secrets-content.js`: textos dos segredos, tempos e destinos musicais autorizados.
+- `js/secrets.js` e `css/secrets.css`: objetos nas margens, papéis, marcadores e interações opcionais.
 - `js/audio.js`: cliques discretos por Web Audio API, criados somente após ativar o som.
+- `js/book-audio.js`: player local de Pupila e Loira Morango, com coordenação entre as faixas.
 - `assets/favicon.svg`: monograma original.
 - `tests/`: testes de fluxo, interação, mobile, fidelidade dos textos, proteção do epílogo, comparação visual e performance. Capturas em `tests/screenshots`.
 
@@ -34,7 +38,7 @@ Edite `BOOK.pages` em `js/content.js` para alterar os capítulos. `paragraphs` c
 
 Os olhos usam DOM Range para medir caracteres reais visíveis, uma vez por alteração de geometria. Um único canvas desenha 3.458 partículas no desktop ou 2.520 no mobile. Letras reais se misturam às partículas extras vindas das bordas. A anatomia, as cores, as densidades e as trajetórias aprovadas foram preservadas na otimização.
 
-A primeira sequência dura 6,8 segundos: formação, pausa, piscada, abertura, pausa, dilatação, permanência e retorno. A revisita dura 4,6 segundos e começa com os olhos formados, olhando para os lados e revirando antes de devolver o texto. `eyesSequenceSeen` só se torna verdadeiro quando uma sequência termina sem cancelamento. Visitas incompletas não contam. Reiniciar limpa esse estado e a escolha do capítulo 04. Nenhum estado é persistido em disco.
+A primeira sequência dura 6,8 segundos: formação, pausa, piscada, abertura, pausa, dilatação, permanência e retorno. A revisita dura 4,6 segundos e começa com os olhos formados, olhando para os lados e revirando antes de devolver o texto. `eyesSequenceSeen` só se torna verdadeiro quando uma sequência termina sem cancelamento. Visitas incompletas não contam. Reiniciar a leitura permite ver a primeira sequência novamente, mas preserva as descobertas persistentes. Na V3, somente tocar uma pupila na janela de revisita insere uma pausa adicional; a sequência normal permanece igual quando esse segredo não é acionado.
 
 Glifos são preparados em atlas e reutilizados com `drawImage`; as trajetórias fixas, tamanhos e trigonometria constante ficam em cache. Não há `measureText`, criação de caracteres, troca de fontes ou alocação de arrays no loop de desenho. A geometria interna só é recalculada quando a expressão muda. O DPR continua limitado a 2, com teto de 2,4 milhões de pixels. `OffscreenCanvas`/`ImageBitmap` são usados quando disponíveis, com fallback para canvas comum. Bitmaps locais, frames e listeners são liberados ao terminar ou sair.
 
@@ -46,7 +50,7 @@ No interlúdio, a escrita tem velocidade e pausas próprias; ao terminar, “Ser
 - Setas esquerda/direita: voltar/avançar; espaço: revelar/avançar. Quando o foco está num botão, seu comportamento nativo é preservado.
 - Tab e Enter permitem percorrer e ativar os controles.
 - O próximo capítulo aguarda a conclusão do efeito ou a escolha da resposta.
-- Voltar à capa reinicia a escolha e a primeira experiência dos olhos. A leitura não é salva entre recargas.
+- Voltar à capa reinicia a leitura, a escolha e a primeira experiência dos olhos. Descobertas e conclusão anterior permanecem salvas.
 - O som começa desligado; sua preferência permanece durante a leitura, inclusive ao reiniciar.
 - O epílogo oculta toda a interface, incluindo som e navegação, até a conclusão. Escolha a preferência de áudio antes de entrar.
 
@@ -74,6 +78,10 @@ node tests/interaction.cjs
 node tests/mobile.cjs
 node tests/eyes-visual.cjs
 node tests/eyes-performance.cjs
+node tests/memory.cjs
+node tests/secrets.cjs
+node tests/pupil-secret.cjs
+node tests/secrets-layout.cjs
 ```
 
 Os testes mobile requerem os navegadores Chromium e WebKit do Playwright. A comparação visual usa também `pngjs` instalado junto ao Playwright. Execute performance isoladamente para evitar disputa por recursos. `capture-v1.cjs` e `update-content.py` são registros de importação inicial, não testes; não os execute para validar ou atualizar a V2.
@@ -83,3 +91,19 @@ Os resultados e limitações da validação estão em `tests/RESULTS.md`. A comp
 Revisar manualmente antes de entregar: volume em fones, leitura no Safari de um iPhone real e no Chrome de um Android, tamanho preferido da fonte e ritmo emocional do epílogo. As fontes são locais: Georgia e Segoe Print/Bradley Hand com alternativas, portanto a caligrafia pode variar conforme o aparelho.
 
 “Obrigado por existir nesse enredo.” foi corrigido conforme solicitado. Os novos capítulos, o poema e a última página foram conferidos literalmente contra os textos aprovados.
+
+## Memória e segredos (V3)
+
+A única chave usada pelo livro é `historias-nunca-escritas`, com `version: 1`, `visits`, `lastPage`, `completedOnce`, `readingFinished`, `eyesSequenceSeen` e o mapa `secrets`. Os microestados de animação, as tentativas dos olhos fugitivos e as figuras já consumidas na sessão ficam apenas em memória.
+
+Cada carregamento incrementa `visits`; mudar de página não incrementa. `lastPage` aceita somente páginas narrativas conhecidas, excluindo capa, epílogo e encerramento. Ao reabrir uma leitura incompleta, a capa oferece um marcador opcional e nunca redireciona automaticamente. `completedOnce` é gravado depois da apresentação completa do encerramento, e não ao entrar no epílogo. O marcador “você voltou” exige uma conclusão existente no início de um novo carregamento e só é descoberto uma vez.
+
+`?reset=1` remove somente a chave do livro, tira esse parâmetro da URL por History API e inicia uma primeira visita. Outros parâmetros e outras chaves permanecem intactos. Esse reset é diferente de “Voltar ao início”. JSON corrompido usa valores padrão; storage bloqueado usa memória volátil. Versões futuras desconhecidas não são sobrescritas. Descobertas de outras abas são preservadas ao salvar.
+
+Os objetos aparecem depois da escrita. Morango no 04; carinha, olho fugitivo e ponta de bilhete no 05, em intervalos próprios fora das linhas de texto; cicatriz no 01; palavra persistente na revisita ao 06; palavra fugitiva no interlúdio; pista e assinatura na última página. Papéis fecham por clique fora, controle de recolher ou Escape. Não existe pontuação nem listagem de descobertas na interface.
+
+Todos os recursos transitórios pertencem a um AbortController da página. Papéis têm ainda um escopo de abertura próprio, liberado ao fechar. A entrada no epílogo aborta a camada antes da transição aprovada. Nenhuma brincadeira, timer de segredo ou anotação é montada nele.
+
+## Música
+
+O som original da V2 era exclusivamente o teclado sintetizado; ele foi preservado integralmente. O cabeçalho controla [Pupila](assets/audio/pupila.wav) com o player local. O disco do morango controla [Loira Morango](assets/audio/loira-morango.mp3) dentro do papel, sem abrir abas externas. As duas faixas usam `preload="metadata"`, não começam automaticamente e nunca tocam simultaneamente. O pequeno sleeve foi desenhado originalmente em CSS; os caminhos podem ser alterados em `js/secrets-content.js`.

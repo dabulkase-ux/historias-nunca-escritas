@@ -31,10 +31,10 @@ const {chromium,assert,open,reveal,ready,next,goEyes,noLeaks,noOverflow}=require
  await page.waitForTimeout(1400);assert.equal(await page.locator('.epilogue-line').textContent(),'Ainda não sei.');
  await page.screenshot({path:'tests/screenshots/v2-epilogue-desktop.png'});
  const styled=await page.screenshot({animations:'disabled'});
- await page.locator('link[href="css/edition.css"]').evaluate(link=>{link.disabled=true;});
+ await page.locator('link[href="css/edition.css"],link[href="css/secrets.css"]').evaluateAll(links=>{links.forEach(link=>{link.disabled=true;});});
  const originalStyle=await page.screenshot({animations:'disabled'});
  assert(styled.equals(originalStyle),'V2 stylesheet changed the epilogue appearance');
- await page.locator('link[href="css/edition.css"]').evaluate(link=>{link.disabled=false;});
+ await page.locator('link[href="css/edition.css"],link[href="css/secrets.css"]').evaluateAll(links=>{links.forEach(link=>{link.disabled=false;});});
  await page.getByRole('button',{name:'continuar',exact:true}).click();await page.getByRole('heading',{name:'Obrigado por fazer parte da minha história.',exact:true}).waitFor();await ready(page);
  await next(page);await page.getByRole('button',{name:'Começar',exact:true}).waitFor();
  await goEyes(page);await page.locator('.eyes-scene[data-revisit="false"]').waitFor();await ready(page);await noLeaks(page);
